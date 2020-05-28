@@ -1,0 +1,106 @@
+resource_types:
+- name: bosh-deployment
+  type: docker-image
+  source:
+    repository: cloudfoundry/bosh-deployment-resource
+
+resources:
+- name: kafka-offline-deployment-repo
+  type: git
+  source:
+    uri: https://github.com/bosh-rebels/kafka-offline-deployment
+    branch: master
+
+- name: deploy-release
+  type: bosh-deployment
+  source:
+    deployment: kafka
+    target: ((bosh_target))
+    client: ((bosh_client))
+    client_secret: ((bosh_client_secret))
+    ca_cert: ((bosh_ca_cert))
+
+- name: kafka-offline-release
+  type: s3
+  source:
+    region_name: ((s3_region))
+    bucket: binary-releases-repo-rebels
+    regexp: "deployments/kafka/kafka-(.*).tgz"
+    access_key_id: ((s3_access_key_id))
+    secret_access_key: ((s3_secret_access_key))
+
+jobs:
+- name: deploy-offline-deployment
+  plan:
+  - get: kafka-offline-deployment-repo
+  - get: kafka-offline-release
+    params: { unpack: true }
+  - put: deploy-release
+    params:
+      manifest: kafka-offline-release/manifest.yml
+      stemcells:
+        - kafka-offline-release/stemcell/stemcell.tgz
+      releases:
+        - kafka-offline-release/releases/zookeeper-*.tgz
+        - kafka-offline-release/releases/kafka-*.tgz
+        - kafka-offline-release/releases/cmak-*.tgz
+        - kafka-offline-release/releases/elasticsearch-*.tgz
+        - kafka-offline-release/releases/kibana-*.tgz
+        - kafka-offline-release/releases/elasticapm-*.tgz
+        - kafka-offline-release/releases/bpm-*.tgz
+      vars_file:
+        - kafka-offline-release/vars_file/vars.yml
+      vars:
+        bpm_version: latest 
+        cmak_instances: 1
+        cmak_network: default
+        cmak_persistent_disk_type: default
+        cmak_stemcell: default
+        cmak_version: latest 
+        cmak_vm_type: default
+        deployment_name: kafka
+        deployment_name: kafka-offline-deployment
+        generatetopics_network: default
+        generatetopics_stemcell: default
+        generatetopics_vm_type: default
+        kafka_auto_create_topics_enable: true
+        kafka_delete_topic: true
+        kafka_deployment_stemcell_os: ubuntu-xenial
+        kafka_deployment_stemcell_version: ((stemcell_version))
+        kafka_enable_topics: false
+        kafka_instances: 3
+        kafka_network: default
+        kafka_offsets_topic_replication_factor: 2
+        kafka_persistent_disk_type: default
+        kafka_stemcell: default
+        kafka_topics: {}
+        kafka_transaction_state_log_min_isr: 1
+        kafka_version: latest 
+        kafka_vm_type: default
+        sanitytest_network: default
+        sanitytest_stemcell: default
+        sanitytest_vm_type: default
+        smoke_tests_network: default
+        smoke_tests_stemcell: default
+        smoke_tests_vm_type: default
+        zookeeper_instances: 3
+        zookeeper_network: default
+        zookeeper_persistent_disk_type: default
+        zookeeper_stemcell: default
+        zookeeper_version: latest 
+        zookeeper_vm_type: default
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
