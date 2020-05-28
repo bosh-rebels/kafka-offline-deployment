@@ -44,11 +44,8 @@ jobs:
         - kafka-offline-release/releases/zookeeper-*.tgz
         - kafka-offline-release/releases/kafka-*.tgz
         - kafka-offline-release/releases/cmak-*.tgz
-        - kafka-offline-release/releases/elasticsearch-*.tgz
-        - kafka-offline-release/releases/kibana-*.tgz
-        - kafka-offline-release/releases/elasticapm-*.tgz
         - kafka-offline-release/releases/bpm-*.tgz
-      vars_file:
+      vars_files:
         - kafka-offline-release/vars_file/vars.yml
       vars:
         bpm_version: latest 
@@ -59,7 +56,6 @@ jobs:
         cmak_version: latest 
         cmak_vm_type: default
         deployment_name: kafka
-        deployment_name: kafka-offline-deployment
         generatetopics_network: default
         generatetopics_stemcell: default
         generatetopics_vm_type: default
@@ -89,18 +85,3 @@ jobs:
         zookeeper_stemcell: default
         zookeeper_version: latest 
         zookeeper_vm_type: default
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
