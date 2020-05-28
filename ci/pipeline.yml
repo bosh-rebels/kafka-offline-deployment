@@ -13,12 +13,17 @@ resources:
 
 - name: deploy-release
   type: bosh-deployment
-  source:
+  source: &deploy-release-source
     deployment: kafka
     target: ((bosh_target))
     client: ((bosh_client))
     client_secret: ((bosh_client_secret))
     ca_cert: ((bosh_ca_cert))
+
+- name: delete-deployment
+  type: bosh-deployment
+  source: 
+    <<: *deploy-release-source
 
 - name: kafka-offline-release
   type: s3
@@ -85,3 +90,11 @@ jobs:
         zookeeper_stemcell: default
         zookeeper_version: latest 
         zookeeper_vm_type: default
+
+- name: delete-kafka-offline-deployment
+  plan:
+  - put: delete-deployment
+    params:
+      delete:
+        enabled: true
+        force: true
