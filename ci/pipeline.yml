@@ -5,16 +5,16 @@ resource_types:
     repository: cloudfoundry/bosh-deployment-resource
 
 resources:
-- name: kafka-offline-deployment-repo
+- name: offline-deployment-repo
   type: git
   source:
-    uri: https://github.com/bosh-rebels/kafka-offline-deployment
+    uri: https://github.com/bosh-rebels/((offline_release_name))-offline-deployment
     branch: master
 
 - name: deploy-release
   type: bosh-deployment
   source: &deploy-release-source
-    deployment: kafka
+    deployment: ((deployment_name))
     target: ((bosh_target))
     client: ((bosh_client))
     client_secret: ((bosh_client_secret))
@@ -25,33 +25,38 @@ resources:
   source: 
     <<: *deploy-release-source
 
-- name: kafka-offline-release
+- name: offline-release
   type: s3
   source:
     region_name: ((s3_region))
     bucket: binary-releases-repo-rebels
-    regexp: "deployments/kafka/kafka-(.*).tgz"
+    regexp: "deployments/((offline_release_name))/((offline_release_name))-(.*).tgz"
     access_key_id: ((s3_access_key_id))
     secret_access_key: ((s3_secret_access_key))
+
+groups:
+- name: deploy ((deployment_name)) deployment
+  jobs:
+  - deploy-offline-deployment
+- name: destroy ((deployment_name)) deployment
+  jobs:
+  - delete-offline-deployment
 
 jobs:
 - name: deploy-offline-deployment
   plan:
-  - get: kafka-offline-deployment-repo
-  - get: kafka-offline-release
+  - get: offline-deployment-repo
+  - get: offline-release
     params: { unpack: true }
   - put: deploy-release
     params:
-      manifest: kafka-offline-release/manifest.yml
+      manifest: offline-release/manifest.yml
       stemcells:
-        - kafka-offline-release/stemcell/stemcell.tgz
+        - offline-release/stemcell/stemcell.tgz
       releases:
-        - kafka-offline-release/releases/zookeeper-*.tgz
-        - kafka-offline-release/releases/kafka-*.tgz
-        - kafka-offline-release/releases/cmak-*.tgz
-        - kafka-offline-release/releases/bpm-*.tgz
+        - offline-release/releases/*.tgz
       vars_files:
-        - kafka-offline-release/vars_file/vars.yml
+        - offline-release/vars_file/vars.yml
       vars:
         bpm_version: latest 
         cmak_instances: 1
@@ -60,7 +65,7 @@ jobs:
         cmak_stemcell: default
         cmak_version: latest 
         cmak_vm_type: default
-        deployment_name: kafka
+        deployment_name: ((deployment_name))
         generatetopics_network: default
         generatetopics_stemcell: default
         generatetopics_vm_type: default
@@ -91,7 +96,7 @@ jobs:
         zookeeper_version: latest 
         zookeeper_vm_type: default
 
-- name: delete-kafka-offline-deployment
+- name: delete-offline-deployment
   plan:
   - put: delete-deployment
     params:
