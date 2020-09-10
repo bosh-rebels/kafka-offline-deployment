@@ -22,14 +22,14 @@ resources:
 
 - name: delete-deployment
   type: bosh-deployment
-  source: 
+  source:
     <<: *deploy-release-source
 
 - name: offline-release
   type: s3
   source:
     region_name: ((s3_region))
-    bucket: binary-releases-repo-rebels
+    bucket: ((s3_bucket_binary))
     regexp: "deployments/((offline_release_name))/((offline_release_name))-(.*).tgz"
     access_key_id: ((s3_access_key_id))
     secret_access_key: ((s3_secret_access_key))
@@ -58,12 +58,12 @@ jobs:
       vars_files:
         - offline-release/vars_file/vars.yml
       vars:
-        bpm_version: latest 
+        bpm_version: latest
         cmak_instances: 1
         cmak_network: default
         cmak_persistent_disk_type: default
         cmak_stemcell: default
-        cmak_version: latest 
+        cmak_version: latest
         cmak_vm_type: default
         deployment_name: ((deployment_name))
         generatetopics_network: default
@@ -81,7 +81,7 @@ jobs:
         kafka_stemcell: default
         kafka_topics: {}
         kafka_transaction_state_log_min_isr: 1
-        kafka_version: latest 
+        kafka_version: latest
         kafka_vm_type: default
         sanitytest_network: default
         sanitytest_stemcell: default
@@ -93,7 +93,7 @@ jobs:
         zookeeper_network: default
         zookeeper_persistent_disk_type: default
         zookeeper_stemcell: default
-        zookeeper_version: latest 
+        zookeeper_version: latest
         zookeeper_vm_type: default
 
 - name: delete-offline-deployment
